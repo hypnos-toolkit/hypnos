@@ -1,0 +1,9 @@
+name=Hyperion
+version=1.0
+author=Alberto Gonzalez <algonzal@uji.es>
+maintainer=Alberto Gonzalez <algonzal@uji.es>
+sentence=A library for efficient IoT devices
+paragraph=A configurable library developed for the Hyperion board. The Hyperion board lets your project be energy efficient due to the detection of the remaining battery and the usage of an smart algorithm for sleep time calculation under the hood.
+category=Power
+url=http://albertogonper.github.io/hyperion
+architectures=*

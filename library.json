@@ -1,0 +1,15 @@
+{
+    "name": "Hyperion",
+    "keywords": "battery, sleep, i2c, iot",
+    "description": "A configurable library developed for the Hyperion board. The Hyperion board lets your project be energy efficient due to the detection of the remaining battery and the usage of an smart algorithm for sleep time calculation under the hood",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/agonper/hyperion.git"
+    },
+    "version": "1.0",
+    "examples": "examples/*/*.ino",
+    "frameworks": "arduino",
+    "platforms": [
+        "atmelavr"
+    ]
+}
