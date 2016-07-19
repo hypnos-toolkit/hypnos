@@ -1,8 +1,9 @@
 Hyperion		KEYWORD1
 
+init	KEYWORD2
 setDelayFunction	KEYWORD2
-setMinDelay		KEYWORD2
-setMaxDelay		KEYWORD2
+setMinDelayMillis		KEYWORD2
+setMaxDelayMillis		KEYWORD2
 setSlope		KEYWORD2
 setDisplacement		KEYWORD2
 getConsumptionTicks	KEYWORD2
