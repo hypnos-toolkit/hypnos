@@ -1,50 +1,50 @@
-#include "Hyperion.h"
+#include "Hypnos.h"
 
-Hyperion::Hyperion(uint16_t batteryMAh) {
+Hypnos::Hypnos(uint16_t batteryMAh) {
   _init(batteryMAh, DEFAULT_MIN_DELAY, DEFAULT_MAX_DELAY);
 }
 
-Hyperion::Hyperion(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis) {
+Hypnos::Hypnos(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis) {
   _init(batteryMAh, minDelayMillis, maxDelayMillis);
 }
 
-void Hyperion::init() {
+void Hypnos::init() {
   Wire.begin();
 }
 
-void Hyperion::setDelayFunction(void (*delayFunction)(uint32_t)) {
+void Hypnos::setDelayFunction(void (*delayFunction)(uint32_t)) {
   _delayFunction = delayFunction;
 }
 
-void Hyperion::setMinDelayMillis(uint32_t minDelayMillis) {
+void Hypnos::setMinDelayMillis(uint32_t minDelayMillis) {
   _min = minDelayMillis;
 }
 
-void Hyperion::setMaxDelayMillis(uint32_t maxDelayMillis) {
+void Hypnos::setMaxDelayMillis(uint32_t maxDelayMillis) {
   _max = maxDelayMillis;
 }
 
-void Hyperion::setSlope(uint16_t slope) {
+void Hypnos::setSlope(uint16_t slope) {
   _slope = slope;
 }
 
-void Hyperion::setDisplacement(uint32_t displacement) {
+void Hypnos::setDisplacement(uint32_t displacement) {
   _displacement = displacement;
 }
 
-uint32_t Hyperion::getConsumptionTicks() {
+uint32_t Hypnos::getConsumptionTicks() {
   return _getTicksFromCounter();
 }
 
-float Hyperion::getRemainingCapacity() {
+float Hypnos::getRemainingCapacity() {
   return _batteryMAh - (_getTicksFromCounter() * MAH_PER_TICK);
 }
 
-float Hyperion::getRemainingPercentage() {
+float Hypnos::getRemainingPercentage() {
   return getRemainingCapacity() / _batteryMAh;
 }
 
-uint32_t Hyperion::previewSleepTime() {
+uint32_t Hypnos::previewSleepTime() {
   // Scale FROM -5 to 5
   float scaledBatteryLevel = getRemainingPercentage() * 10 - 5;
 
@@ -55,11 +55,11 @@ uint32_t Hyperion::previewSleepTime() {
   return (_max - _min) * timelinePosition + _min;
 }
 
-void Hyperion::sleep() {
+void Hypnos::sleep() {
   _delayFunction(previewSleepTime());
 }
 
-void Hyperion::_init(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis) {
+void Hypnos::_init(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis) {
   _batteryMAh = batteryMAh;
 
   _min = minDelayMillis;
@@ -71,7 +71,7 @@ void Hyperion::_init(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxD
   _lastTicks = 0; // TODO Initialize from NVRAM
 }
 
-uint32_t Hyperion::_getTicksFromCounter() {
+uint32_t Hypnos::_getTicksFromCounter() {
   if (millis() >= _lastTickCheck + MAX_PERIOD) {
     uint8_t i = LONG_BYTES - 1;
     uint32_t ticks = 0;

@@ -1,5 +1,5 @@
-#ifndef Hyperion_h
-#define Hyperion_h
+#ifndef Hypnos_h
+#define Hypnos_h
 
 #include "Arduino.h"
 #include <Wire.h>
@@ -16,10 +16,10 @@
 #define DEFAULT_SLOPE 2
 #define DEFAULT_DISPLACEMENT 20
 
-class Hyperion {
+class Hypnos {
   public:
-    Hyperion(uint16_t batteryMAh);
-    Hyperion(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis);
+    Hypnos(uint16_t batteryMAh);
+    Hypnos(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis);
     void init();
     void setDelayFunction(void (*delayFunction)(uint32_t));
     void setMinDelayMillis(uint32_t minDelayMillis);

@@ -1,4 +1,4 @@
-Hyperion		KEYWORD1
+Hypnos		KEYWORD1
 
 init	KEYWORD2
 setDelayFunction	KEYWORD2
