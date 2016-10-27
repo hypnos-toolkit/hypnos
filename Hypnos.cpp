@@ -24,11 +24,11 @@ void Hypnos::setMaxDelayMillis(uint32_t maxDelayMillis) {
   _max = maxDelayMillis;
 }
 
-void Hypnos::setSlope(uint16_t slope) {
+void Hypnos::setSlope(float slope) {
   _slope = slope;
 }
 
-void Hypnos::setDisplacement(uint32_t displacement) {
+void Hypnos::setDisplacement(double displacement) {
   _displacement = displacement;
 }
 
@@ -56,7 +56,23 @@ uint32_t Hypnos::previewSleepTime() {
 }
 
 void Hypnos::sleep() {
-  _delayFunction(previewSleepTime());
+  uint32_t sleepTime = previewSleepTime();
+  uint32_t threshold = ((_max - _min) * UPPER_SLEEP_LIMIT + _min);
+
+  if (sleepTime < threshold) {
+      _delayFunction(sleepTime);
+  } else {
+    sleepTime = threshold;
+    if (getRemainingPercentage() < RISKY_BATTERY_LEVEL) {
+      sleepTime *= 2; // Risky battery level, sleep more to charge more battery
+    }
+    float preSleepBat = getRemainingPercentage();
+    _delayFunction(sleepTime);
+    float postSleepBat = getRemainingPercentage();
+    if (postSleepBat < preSleepBat) { // If discharging continue sleeping
+      sleep();
+    }
+  }
 }
 
 void Hypnos::_init(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis) {
