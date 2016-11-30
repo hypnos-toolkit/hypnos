@@ -63,6 +63,11 @@ TEST(TicksMock, calculatesTicks) {
     EXPECT_EQ(Ticks.ticksNeeded(CAPACITY, 0.5), 292);
 }
 
+
+TEST(TicksMock, returnsTicksForFullBattery) {
+    EXPECT_EQ(Ticks.ticksNeeded(CAPACITY, 1.0), 0);
+}
+
 TEST(Hypnos, getsTotalCapacity) {
     Ticks.reset();
     Hypnos hypnos(CAPACITY);
@@ -126,7 +131,7 @@ TEST(Hypnos, longSleepIsSmallerThanShortSleepDueTimePartition) {
     Hypnos hypnos1(CAPACITY);
     hypnos1.setDelayFunction(&mockedDelay);
     hypnos1.init();
-    Ticks.incrementTicks(Ticks.ticksNeeded(CAPACITY, 0.5));
+    Ticks.incrementTicks(Ticks.ticksNeeded(CAPACITY, 0.45));
     hypnos1.sleep();
     uint32_t delay1 = getMockedDelay();
 
@@ -192,7 +197,7 @@ TEST(Hypnos, getsOutOfSleepCicle) {
     hypnos.setDelayFunction(&mockedDelay);
     hypnos.init();
 
-    EXPECT_TRUE(!testSleepData.insideSleepCheckCicle);
+    EXPECT_TRUE(!testSleepData.insideSleepCheckCycle);
 }
 
 TEST(Hypnos, emptiesSleepTimeStashAfterSleepCicle) {
@@ -218,7 +223,7 @@ TEST(Hypnos, modifiesLastBatteryValue) {
     hypnos.setDelayFunction(&mockedDelay);
     hypnos.init();
 
-    EXPECT_NEAR(testSleepData.batteryBeforeSleep, 0.2, 0.001);
+    EXPECT_NEAR(testSleepData.batteryBeforeSleep, 0.2, 0.01);
 }
 
 

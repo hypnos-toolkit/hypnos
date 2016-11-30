@@ -7,7 +7,7 @@ void setup() {
   Serial.begin(9600);
   hypnos.setMinDelayMillis(1000); // By default 1min
   hypnos.setMaxDelayMillis(10*3600*1000); // By default 12h
-  hypnos.setDelayFunction(delay);
+  hypnos.setDelayFunction(&delay);
   hypnos.init(); // Important this must go after all setter statements
 }
 

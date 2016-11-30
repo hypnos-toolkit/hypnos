@@ -30,8 +30,8 @@
 #define UPPER_SLEEP_LIMIT 0.1
 
 struct SleepData {
-  bool insideSleepCheckCicle;
-  uint8_t sleepCicleCounter;
+  bool insideSleepCheckCycle;
+  uint16_t sleepCycleCounter;
   uint32_t sleepTimeStash;
   bool calledSleepFunctionOverThreshold;
   float batteryBeforeSleep;
@@ -61,7 +61,7 @@ class Hypnos {
     uint32_t _max;
     float _slope;
     double _displacement;
-    void _init(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis, SleepData* sleepData);
+    void _init(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis);
     uint32_t _getTicksFromCounter();
     uint32_t _calculateSleepTimeOverThreshold(uint32_t threshold);
     void _putToSleepIfDischarging();

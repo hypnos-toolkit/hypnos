@@ -26,7 +26,7 @@ void TicksMock::reset() {
 }
 
 uint32_t TicksMock::ticksNeeded(uint16_t batteryCapacity, float percentage) {
-    return (uint32_t) ((batteryCapacity / MAH_PER_TICK) * percentage);
+    return (uint32_t) ((batteryCapacity / MAH_PER_TICK) * (1.0 - percentage));
 }
 
 TicksMock Ticks;
