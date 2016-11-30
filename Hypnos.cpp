@@ -1,15 +1,28 @@
 #include "Hypnos.h"
 
+struct SleepData defSleepData = {false, 0, 0, false, 0.0};
+
 Hypnos::Hypnos(uint16_t batteryMAh) {
-  _init(batteryMAh, DEFAULT_MIN_DELAY, DEFAULT_MAX_DELAY);
+  _init(batteryMAh, DEFAULT_MIN_DELAY, DEFAULT_MAX_DELAY, &defSleepData);
+}
+
+Hypnos::Hypnos(uint16_t batteryMAh, SleepData* sleepData) {
+  _init(batteryMAh, DEFAULT_MIN_DELAY, DEFAULT_MAX_DELAY, sleepData);
 }
 
 Hypnos::Hypnos(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis) {
-  _init(batteryMAh, minDelayMillis, maxDelayMillis);
+  _init(batteryMAh, minDelayMillis, maxDelayMillis, &defSleepData);
+}
+
+Hypnos::Hypnos(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis, SleepData* sleepData) {
+  _init(batteryMAh, minDelayMillis, maxDelayMillis, sleepData);
 }
 
 void Hypnos::init() {
   Wire.begin();
+  if (_sleepData->calledSleepFunctionOverThreshold) {
+    _putToSleepIfDischarging();
+  }
 }
 
 void Hypnos::setDelayFunction(void (*delayFunction)(uint32_t)) {
@@ -37,7 +50,7 @@ uint32_t Hypnos::getConsumptionTicks() {
 }
 
 float Hypnos::getRemainingCapacity() {
-  return _batteryMAh - (_getTicksFromCounter() * MAH_PER_TICK);
+  return (float) (_batteryMAh - (_getTicksFromCounter() * MAH_PER_TICK));
 }
 
 float Hypnos::getRemainingPercentage() {
@@ -49,33 +62,29 @@ uint32_t Hypnos::previewSleepTime() {
   float scaledBatteryLevel = getRemainingPercentage() * 10 - 5;
 
   // Biased sigmoid function that handicaps low battery levels
-  float timelinePosition = 1.0 / (1.0 + _displacement * exp(_slope * scaledBatteryLevel));
+  float timelinePosition = (float) (1.0f / (1.0f + _displacement * exp(_slope * scaledBatteryLevel)));
 
   // Calculate delay time based on given parameters
-  return (_max - _min) * timelinePosition + _min;
+  return (uint32_t) ((_max - _min) * timelinePosition + _min);
 }
 
 void Hypnos::sleep() {
   uint32_t sleepTime = previewSleepTime();
-  uint32_t threshold = ((_max - _min) * UPPER_SLEEP_LIMIT + _min);
+  uint32_t threshold = (uint32_t) ((_max - _min) * UPPER_SLEEP_LIMIT + _min);
 
   if (sleepTime < threshold) {
       _delayFunction(sleepTime);
   } else {
-    sleepTime = threshold;
-    if (getRemainingPercentage() < RISKY_BATTERY_LEVEL) {
-      sleepTime *= 2; // Risky battery level, sleep more to charge more battery
-    }
-    float preSleepBat = getRemainingPercentage();
+    _sleepData->sleepCicleCounter++;
+    sleepTime = _calculateSleepTimeOverThreshold((uint32_t) (log10(10 * _sleepData->sleepCicleCounter) * threshold));
+    _sleepData->batteryBeforeSleep = getRemainingPercentage();
+    _sleepData->calledSleepFunctionOverThreshold = true;
     _delayFunction(sleepTime);
-    float postSleepBat = getRemainingPercentage();
-    if (postSleepBat < preSleepBat) { // If discharging continue sleeping
-      sleep();
-    }
+    _putToSleepIfDischarging(); // Not called if sleep function resets board
   }
 }
 
-void Hypnos::_init(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis) {
+void Hypnos::_init(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMillis, SleepData* sleepData) {
   _batteryMAh = batteryMAh;
 
   _min = minDelayMillis;
@@ -85,9 +94,14 @@ void Hypnos::_init(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDel
 
   _lastTickCheck = millis() - MAX_PERIOD;
   _lastTicks = 0; // TODO Initialize from NVRAM
+
+  _sleepData = sleepData;
 }
 
 uint32_t Hypnos::_getTicksFromCounter() {
+#ifdef TESTING_ENV
+  return Ticks.getTicks();
+#else
   if (millis() >= _lastTickCheck + MAX_PERIOD) {
     uint8_t i = LONG_BYTES - 1;
     uint32_t ticks = 0;
@@ -103,4 +117,32 @@ uint32_t Hypnos::_getTicksFromCounter() {
   }
 
   return _lastTicks;
+#endif
+}
+
+uint32_t Hypnos::_calculateSleepTimeOverThreshold(uint32_t threshold) {
+  if (!_sleepData->insideSleepCheckCicle) {
+    _sleepData->sleepTimeStash = previewSleepTime();
+    _sleepData->insideSleepCheckCicle = true;
+  }
+  uint32_t sleepTime = (_sleepData->sleepTimeStash < threshold) ? _sleepData->sleepTimeStash : threshold;
+  _sleepData->sleepTimeStash -= sleepTime;
+  return sleepTime;
+}
+
+void Hypnos::_putToSleepIfDischarging() {
+  _sleepData->calledSleepFunctionOverThreshold = false;
+
+  float batteryAfterSleep = getRemainingPercentage();
+  if (batteryAfterSleep < _sleepData->batteryBeforeSleep) { // If discharging continue sleeping
+    if (_sleepData->insideSleepCheckCicle && _sleepData->sleepTimeStash == 0) {
+      _sleepData->insideSleepCheckCicle = false;
+      _sleepData->sleepCicleCounter = 0;
+      return;
+    }
+    sleep();
+  } else {
+    _sleepData->insideSleepCheckCicle = false;
+    _sleepData->sleepCicleCounter = 0;
+  }
 }

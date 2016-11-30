@@ -3,3 +3,11 @@
 
 # VS Code
 .vscode
+
+#CLion
+.idea
+
+#CMake
+cmake-build-debug
+
+Hypnos.h.gch
