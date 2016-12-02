@@ -1,6 +1,6 @@
 #include "Hypnos.h"
 
-struct SleepData defSleepData = {false, 0, 0, false, 0.0};
+struct SleepData defSleepData = {0, 0, 0.0};
 
 Hypnos::Hypnos(uint16_t batteryMAh) {
     _sleepData = &defSleepData;
@@ -24,7 +24,7 @@ Hypnos::Hypnos(uint16_t batteryMAh, uint32_t minDelayMillis, uint32_t maxDelayMi
 
 void Hypnos::init() {
     Wire.begin();
-    if (_sleepData->calledSleepFunctionOverThreshold) {
+    if (_sleepData->sleepCycleCounter > 0) {
         _putToSleepIfDischarging();
     }
 }
@@ -80,9 +80,8 @@ void Hypnos::sleep() {
         _delayFunction(sleepTime);
     } else {
         _sleepData->sleepCycleCounter++;
-        sleepTime = _calculateSleepTimeOverThreshold((uint32_t) (log10(10 * _sleepData->sleepCycleCounter) * threshold));
         _sleepData->batteryBeforeSleep = getRemainingPercentage();
-        _sleepData->calledSleepFunctionOverThreshold = true;
+        sleepTime = _calculateSleepTimeOverThreshold((uint32_t) (log10(10 * _sleepData->sleepCycleCounter) * threshold));
         _delayFunction(sleepTime);
         _putToSleepIfDischarging(); // Not called if sleep function resets board
     }
@@ -123,9 +122,8 @@ uint32_t Hypnos::_getTicksFromCounter() {
 }
 
 uint32_t Hypnos::_calculateSleepTimeOverThreshold(uint32_t threshold) {
-    if (!_sleepData->insideSleepCheckCycle) {
+    if (_sleepData->sleepCycleCounter == 1) {
         _sleepData->sleepTimeStash = previewSleepTime();
-        _sleepData->insideSleepCheckCycle = true;
     }
     uint32_t sleepTime = (_sleepData->sleepTimeStash < threshold) ? _sleepData->sleepTimeStash : threshold;
     _sleepData->sleepTimeStash -= sleepTime;
@@ -133,19 +131,14 @@ uint32_t Hypnos::_calculateSleepTimeOverThreshold(uint32_t threshold) {
 }
 
 void Hypnos::_putToSleepIfDischarging() {
-    _sleepData->calledSleepFunctionOverThreshold = false;
-
     float batteryAfterSleep = getRemainingPercentage();
-    if (_sleepData->batteryBeforeSleep >= batteryAfterSleep) { // If discharging continue sleeping
-        if (_sleepData->insideSleepCheckCycle && _sleepData->sleepTimeStash == 0) {
-            _sleepData->insideSleepCheckCycle = false;
-            _sleepData->sleepCycleCounter = 0;
-            return;
-        }
-        sleep();
-    } else {
-        _sleepData->insideSleepCheckCycle = false;
+
+    if (_sleepData->batteryBeforeSleep < batteryAfterSleep
+        || (_sleepData->sleepCycleCounter > 0 && _sleepData->sleepTimeStash == 0)) {
+
         _sleepData->sleepCycleCounter = 0;
         _sleepData->sleepTimeStash = 0;
+    } else {
+        sleep();
     }
 }

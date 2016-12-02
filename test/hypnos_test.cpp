@@ -162,7 +162,7 @@ TEST(Hypnos, callsSleepFunctionMoreThanOnceWithLowBatteryLevel) {
 }
 
 TEST(Hypnos, sleepsWithDischargingBatteryAndBeingInsideSleepCicle) {
-    struct SleepData testSleepData = {true, 1, 20691000, true, 0.3};
+    struct SleepData testSleepData = {1, 20691000, 0.3};
     Ticks.reset();
     resetMockedDelay();
 
@@ -175,7 +175,7 @@ TEST(Hypnos, sleepsWithDischargingBatteryAndBeingInsideSleepCicle) {
 }
 
 TEST(Hypnos, doesNotSleepAfterRecoveringBattery) {
-    struct SleepData testSleepData = {true, 1, 20691000, true, 0.3};
+    struct SleepData testSleepData = {1, 20691000, 0.3};
     Ticks.reset();
     resetMockedDelay();
 
@@ -188,7 +188,7 @@ TEST(Hypnos, doesNotSleepAfterRecoveringBattery) {
 }
 
 TEST(Hypnos, getsOutOfSleepCicle) {
-    struct SleepData testSleepData = {true, 1, 20691000, true, 0.3};
+    struct SleepData testSleepData = {1, 20691000, 0.3};
     Ticks.reset();
     resetMockedDelay();
 
@@ -197,11 +197,11 @@ TEST(Hypnos, getsOutOfSleepCicle) {
     hypnos.setDelayFunction(&mockedDelay);
     hypnos.init();
 
-    EXPECT_TRUE(!testSleepData.insideSleepCheckCycle);
+    EXPECT_TRUE(testSleepData.sleepCycleCounter == 0);
 }
 
 TEST(Hypnos, emptiesSleepTimeStashAfterSleepCicle) {
-    struct SleepData testSleepData = {true, 1, 20691000, true, 0.3};
+    struct SleepData testSleepData = {1, 20691000, 0.3};
     Ticks.reset();
     resetMockedDelay();
 
@@ -214,7 +214,7 @@ TEST(Hypnos, emptiesSleepTimeStashAfterSleepCicle) {
 }
 
 TEST(Hypnos, modifiesLastBatteryValue) {
-    struct SleepData testSleepData = {true, 1, 20691000, true, 0.3};
+    struct SleepData testSleepData = {1, 20691000, 0.3};
     Ticks.reset();
     resetMockedDelay();
 
