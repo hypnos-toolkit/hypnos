@@ -1,0 +1,8 @@
+language:
+  - cpp
+
+install:
+  - cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" ./
+
+script:
+  - ./cmake-build-debug/test/runUnitTests --gtest_filter=* --gtest_color=no
