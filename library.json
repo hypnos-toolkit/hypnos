@@ -1,10 +1,10 @@
 {
-    "name": "Hyperion",
+    "name": "Hypnos",
     "keywords": "battery, sleep, i2c, iot",
-    "description": "A configurable library developed for the Hyperion board. The Hyperion board lets your project be energy efficient due to the detection of the remaining battery and the usage of an smart algorithm for sleep time calculation under the hood",
+    "description": "A configurable library developed for the Hypnos board. The Hypnos board lets your project be energy efficient due to the detection of the remaining battery and the usage of an smart algorithm for sleep time calculation under the hood",
     "repository": {
         "type": "git",
-        "url": "https://github.com/agonper/hyperion.git"
+        "url": "https://github.com/agonper/hypnos.git"
     },
     "version": "1.0",
     "examples": "examples/*/*.ino",
