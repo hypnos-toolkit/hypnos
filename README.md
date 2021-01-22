@@ -1,4 +1,4 @@
-# Hypnos
+# Hypnos [![DOI](https://zenodo.org/badge/200372107.svg)](https://zenodo.org/badge/latestdoi/200372107)
 
 Hypnos is a hardware and software toolkit which facilitates the creation of energy-aware IoT nodes based on widely extended consumer board platforms: Arduino, LinkIt One and Particle, to mention a few.
 
